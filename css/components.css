@@ -84,14 +84,24 @@ button:active {
   text-align: right;
 }
 
-.history-actions {
+.history-actions,
+.history-export-actions {
   display: grid;
-  min-width: 112px;
   gap: 8px;
+}
+
+.history-actions {
+  min-width: 116px;
   justify-items: end;
 }
 
-.history-actions button {
+.history-export-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 14px;
+}
+
+.history-actions button,
+.history-export-actions button {
   min-height: 34px;
   padding: 6px 12px;
   font-size: 12px;
@@ -183,6 +193,10 @@ button:active {
 .edit-mode {
   margin: 10px 0 0;
   color: var(--warn);
+}
+
+.autosave-note {
+  color: var(--success);
 }
 
 /* Buttons and inputs */
@@ -344,6 +358,7 @@ textarea {
   .template-controls,
   .app-name-control,
   .data-transfer-actions,
+  .history-export-actions,
   .set-tools {
     grid-template-columns: 1fr;
   }
