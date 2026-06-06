@@ -1,0 +1,100 @@
+{
+  "workouts": [
+    {
+      "id": "sample-first-workout",
+      "date": "2026-06-02",
+      "completedAt": "2026-06-02T09:00:00.000Z",
+      "templateId": "workout-a-foundation",
+      "recoveryStatus": "Fresh",
+      "sessionRatings": {
+        "energy": "8",
+        "areaOneDiscomfort": "1",
+        "areaTwoDiscomfort": "0",
+        "sorenessBefore": "2"
+      },
+      "name": "Workout A — Foundation Push/Pull",
+      "source": "Sample V1.1 workout",
+      "complete": true,
+      "notes": "Sample completed session. Personal notes are only stored locally when entered in the app.",
+      "exercises": [
+        {
+          "id": "db-bench",
+          "name": "Dumbbell Bench Press",
+          "loadType": "kg",
+          "repRange": "8-10",
+          "painStatus": "No pain",
+          "notes": "",
+          "sets": [
+            { "load": "12.5", "reps": "10", "done": true },
+            { "load": "12.5", "reps": "10", "done": true }
+          ]
+        },
+        {
+          "id": "seated-cable-row",
+          "name": "Seated Cable Row",
+          "loadType": "pin",
+          "repRange": "8-10",
+          "painStatus": "No pain",
+          "notes": "",
+          "sets": [
+            { "load": "4", "reps": "10", "done": true },
+            { "load": "4", "reps": "10", "done": true },
+            { "load": "4", "reps": "10", "done": true }
+          ]
+        },
+        {
+          "id": "lat-pulldown",
+          "name": "Lat Pulldown",
+          "loadType": "pin",
+          "repRange": "8-10",
+          "painStatus": "No pain",
+          "notes": "",
+          "sets": [
+            { "load": "3", "reps": "10", "done": true },
+            { "load": "3", "reps": "10", "done": true },
+            { "load": "3", "reps": "10", "done": true }
+          ]
+        },
+        {
+          "id": "lateral-raise",
+          "name": "Dumbbell Lateral Raise",
+          "loadType": "kg",
+          "repRange": "12-15",
+          "painStatus": "No pain",
+          "notes": "",
+          "sets": [
+            { "load": "5", "reps": "12", "done": true },
+            { "load": "5", "reps": "12", "done": true },
+            { "load": "5", "reps": "12", "done": true }
+          ]
+        },
+        {
+          "id": "hammer-curl",
+          "name": "Hammer Curl",
+          "loadType": "kg",
+          "repRange": "10-12",
+          "painStatus": "No pain",
+          "notes": "",
+          "sets": [
+            { "load": "12.5", "reps": "12", "done": true },
+            { "load": "12.5", "reps": "12", "done": true },
+            { "load": "12.5", "reps": "12", "done": true }
+          ]
+        },
+        {
+          "id": "rope-pushdown",
+          "name": "Rope Pushdown",
+          "loadType": "pin",
+          "repRange": "10-12",
+          "painStatus": "No pain",
+          "notes": "",
+          "sets": [
+            { "load": "3", "reps": "12", "done": true },
+            { "load": "3", "reps": "12", "done": true },
+            { "load": "3", "reps": "12", "done": true }
+          ]
+        }
+      ]
+    }
+  ]
+}

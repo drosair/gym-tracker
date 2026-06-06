@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Gym Tracker icon</title>
+  <rect width="128" height="128" rx="18" fill="#121212"/>
+  <path d="M27 55h11v18H27zM40 48h10v32H40zM53 60h42v8H53zM98 48h10v32H98zM110 55h11v18h-11z" fill="#a6dc76"/>
+  <path d="M30 91h68" stroke="#7fb7d9" stroke-width="8" stroke-linecap="round"/>
+</svg>

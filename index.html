@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#070707">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gym Tracker">
+    <meta name="description" content="A local-first progressive gym tracker.">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="./css/theme.css">
+    <link rel="stylesheet" href="./css/components.css">
+    <title>Gym Tracker</title>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand-row">
+        <div>
+          <p class="eyebrow">Local-first PWA</p>
+          <h1 id="app-title">Gym Tracker</h1>
+        </div>
+        <span class="sync-pill" id="storage-status">Offline ready</span>
+      </div>
+      <nav class="tab-bar" aria-label="Primary">
+        <button class="tab-button" type="button" data-view="dashboard">Dashboard</button>
+        <button class="tab-button" type="button" data-view="library">Library</button>
+        <button class="tab-button" type="button" data-view="log">Log</button>
+        <button class="tab-button" type="button" data-view="history">History</button>
+        <button class="tab-button" type="button" data-view="weight">Weight</button>
+        <button class="tab-button" type="button" data-view="timer">Timer</button>
+      </nav>
+    </header>
+
+    <main class="app-shell">
+      <section id="view-dashboard" class="view" aria-labelledby="dashboard-title"></section>
+      <section id="view-library" class="view" aria-labelledby="library-title"></section>
+      <section id="view-log" class="view" aria-labelledby="log-title"></section>
+      <section id="view-history" class="view" aria-labelledby="history-title"></section>
+      <section id="view-weight" class="view" aria-labelledby="weight-title"></section>
+      <section id="view-timer" class="view" aria-labelledby="timer-title"></section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./js/storage.js"></script>
+    <script src="./js/app.js"></script>
+  </body>
+</html>
