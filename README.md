@@ -2,6 +2,8 @@
 
 A mobile-first Progressive Web App for logging workouts, reviewing exercise history, tracking body weight, timing rests, and getting simple progressive overload suggestions.
 
+Current version: `v1.0.0`
+
 ## Structure
 
 ```text
@@ -90,6 +92,14 @@ The repository contains only generic templates, generic sample data, and app cod
 There is no backend, account system, telemetry, analytics, or remote sync. Clearing the browser's site data will remove local workout data.
 
 Use the Dashboard's Data Transfer section before changing domains or deployment providers. Export downloads a JSON file containing this app's local workout history, active workout, body weight entries, app display name, and app settings. Import restores that JSON onto the current URL's `localStorage`.
+
+## Versioning
+
+Releases use semantic version tags:
+
+- Patch versions for fixes that do not change app behavior or data shape.
+- Minor versions for new features that remain backward compatible.
+- Major versions for breaking changes, including local data format changes that cannot be migrated automatically.
 
 ## Gym Buddy Image
 
