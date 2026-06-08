@@ -325,6 +325,7 @@
   }
 
   function setView(view) {
+    if (state.view === "log") syncLogFormToActive();
     state.view = view;
     store.write(store.keys.view, view);
     document.querySelectorAll(".tab-button").forEach((button) => {
@@ -420,6 +421,22 @@
   function formatRating(workout, key, suffix = "/10") {
     const value = ratingValue(workout, key);
     return value === null ? "-" : `${value}${suffix}`;
+  }
+
+  function slugify(value) {
+    return String(value || "export")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80) || "export";
+  }
+
+  function workoutFileName(workout, suffix, extension) {
+    return `${workout.date || today()}-${slugify(workout.name)}-${suffix}.${extension}`;
+  }
+
+  function findHistoryWorkout(workoutId) {
+    return getHistory().find((workout) => workout.id === workoutId);
   }
 
   function renderOptions(options, selected) {
@@ -802,6 +819,7 @@
           <div class="progress-fill" style="width: ${stats.pct}%"></div>
         </div>
         <p class="small">${stats.done}/${stats.total} sets complete</p>
+        <p class="small autosave-note">Autosaves while you type. Switching tabs keeps the current log values on this device.</p>
         <div class="workout-actions">
           <button class="button-primary" type="button" data-finish-workout>${state.active.editingHistoryId ? "Save changes" : "Finish workout"}</button>
           ${state.active.editingHistoryId ? "<button class=\"button-secondary\" type=\"button\" data-cancel-edit>Cancel edit</button>" : ""}
@@ -855,6 +873,10 @@
         <p class="section-kicker">Exercise History</p>
         <h2 ${history.length ? "id=\"history-title\"" : ""}>Workout History</h2>
         <p class="muted">Saved locally on this device. Your sample first workout is loaded here automatically.</p>
+        <div class="history-export-actions">
+          <button class="button-primary" type="button" data-export-history-ai>Export all for AI</button>
+          <button class="button-secondary" type="button" data-print-history>PDF-style report</button>
+        </div>
       </div>
       ${history.map((workout) => {
         const normalized = normalizeLegacyActive(workout);
@@ -868,6 +890,8 @@
             <div class="history-actions">
               <span class="badge">${normalized.exercises.length} moves</span>
               <button class="button-secondary" type="button" data-edit-history="${escapeHtml(normalized.id)}" aria-label="Edit ${escapeHtml(normalized.name)} from ${escapeHtml(normalized.date)}">Edit</button>
+              <button class="button-secondary" type="button" data-export-workout-ai="${escapeHtml(normalized.id)}" aria-label="Export ${escapeHtml(normalized.name)} for AI">AI</button>
+              <button class="button-secondary" type="button" data-print-workout="${escapeHtml(normalized.id)}" aria-label="Open PDF-style report for ${escapeHtml(normalized.name)}">Report</button>
             </div>
           </header>
           <div class="history-meta">
@@ -967,6 +991,31 @@
     saveActive();
   }
 
+  function syncLogFormToActive() {
+    if (!state.active) return;
+
+    document.querySelectorAll("[data-set-field]").forEach((input) => {
+      const exercise = state.active.exercises[Number(input.dataset.exerciseIndex)];
+      const set = exercise?.sets?.[Number(input.dataset.setIndex)];
+      if (set) set[input.dataset.setField] = input.value;
+    });
+
+    document.querySelectorAll("[data-exercise-field]").forEach((input) => {
+      const exercise = state.active.exercises[Number(input.dataset.exerciseIndex)];
+      if (exercise) exercise[input.dataset.exerciseField] = input.value;
+    });
+
+    document.querySelectorAll("[data-rating-field]").forEach((input) => {
+      state.active.sessionRatings = { ...defaultRatings, ...(state.active.sessionRatings || {}) };
+      state.active.sessionRatings[input.dataset.ratingField] = input.value;
+    });
+
+    const notes = document.querySelector("[data-workout-notes]");
+    if (notes) state.active.notes = notes.value;
+
+    saveActive();
+  }
+
   function updateExerciseField(input) {
     const exercise = state.active.exercises[Number(input.dataset.exerciseIndex)];
     exercise[input.dataset.exerciseField] = input.value;
@@ -1011,6 +1060,7 @@
   }
 
   function finishWorkout() {
+    syncLogFormToActive();
     state.active = normalizeLegacyActive(state.active);
     const stats = completedStats(state.active);
     const editingHistoryId = state.active.editingHistoryId;
@@ -1072,6 +1122,310 @@
     applyAppName();
     showToast("App name saved locally.");
     renderDashboard();
+  }
+
+  function workoutAiText(workout, index = 1) {
+    const normalized = normalizeLegacyActive(workout);
+    const lines = [
+      `## Workout ${index}: ${normalized.name}`,
+      `Date: ${normalized.date || "-"}`,
+      `Completed: ${normalized.complete ? "Yes" : "No"}`,
+      `Recovery status: ${normalized.recoveryStatus || "-"}`,
+      `Energy: ${formatRating(normalized, "energy")}`,
+      `Area 1 discomfort: ${formatRating(normalized, "areaOneDiscomfort")}`,
+      `Area 2 discomfort: ${formatRating(normalized, "areaTwoDiscomfort")}`,
+      `Soreness before: ${formatRating(normalized, "sorenessBefore")}`,
+      "",
+      "Exercises:"
+    ];
+
+    normalized.exercises.forEach((exercise) => {
+      lines.push(`- ${exercise.name}`);
+      lines.push(`  - Load type: ${exercise.loadType || "-"}`);
+      lines.push(`  - Target: ${exercise.target || exercise.repRange || "-"}`);
+      lines.push(`  - Sets: ${exercise.sets.map((set, setIndex) => {
+        const status = set.done ? "done" : "not done";
+        return `Set ${setIndex + 1}: ${formatLoad(exercise, set.load)} x ${set.reps || "-"} (${status})`;
+      }).join("; ")}`);
+      if (exercise.painStatus) lines.push(`  - Discomfort: ${exercise.painStatus}`);
+      if (exercise.notes) lines.push(`  - Exercise note: ${exercise.notes}`);
+    });
+
+    lines.push("");
+    lines.push(`Session notes: ${normalized.notes || "-"}`);
+    return lines.join("\n");
+  }
+
+  function historyAiText(workouts) {
+    const normalized = workouts.map(normalizeLegacyActive);
+    const completed = normalized.filter((workout) => workout.complete !== false);
+    const lines = [
+      "# Gym Tracker Export for AI Analysis",
+      `Exported at: ${new Date().toISOString()}`,
+      `Workout count: ${normalized.length}`,
+      `Completed workouts: ${completed.length}`,
+      `Average energy: ${averageRating(completed, "energy")}`,
+      `Average area 1 discomfort: ${averageRating(completed, "areaOneDiscomfort")}`,
+      `Average area 2 discomfort: ${averageRating(completed, "areaTwoDiscomfort")}`,
+      "",
+      "Use this data to analyze trends, consistency, progression, recovery, and exercise performance. Treat notes as user-entered local context.",
+      ""
+    ];
+
+    normalized.forEach((workout, index) => {
+      lines.push(workoutAiText(workout, index + 1));
+      lines.push("");
+    });
+
+    return lines.join("\n").trim() + "\n";
+  }
+
+  function downloadText(filename, content, type = "text/plain") {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportWorkoutForAi(workoutId) {
+    const workout = findHistoryWorkout(workoutId);
+    if (!workout) {
+      showToast("Workout not found.");
+      return;
+    }
+
+    const normalized = normalizeLegacyActive(workout);
+    downloadText(workoutFileName(normalized, "ai-export", "md"), historyAiText([normalized]), "text/markdown");
+    showToast("Workout AI export downloaded.");
+  }
+
+  function exportHistoryForAi() {
+    const history = getHistory();
+    if (!history.length) {
+      showToast("No history to export.");
+      return;
+    }
+
+    downloadText(`gym-tracker-history-ai-export-${today()}.md`, historyAiText(history), "text/markdown");
+    showToast("History AI export downloaded.");
+  }
+
+  function printableWorkoutHtml(workout, index = 0) {
+    const normalized = normalizeLegacyActive(workout);
+    const imageSrc = index % 2 === 0 ? "./assets/images/dumbbells-closeup.png" : "./assets/images/gym-equipment.png";
+
+    return `
+      <section class="workout">
+        <header class="workout-header">
+          <div>
+            <h2>${escapeHtml(normalized.name)}</h2>
+            <p>${escapeHtml(normalized.date || "-")} · ${normalized.complete ? "Complete" : "In progress"}</p>
+          </div>
+          <img src="${imageSrc}" alt="" aria-hidden="true">
+        </header>
+        <dl>
+          <div><dt>Recovery</dt><dd>${escapeHtml(normalized.recoveryStatus || "-")}</dd></div>
+          <div><dt>Energy</dt><dd>${escapeHtml(formatRating(normalized, "energy"))}</dd></div>
+          <div><dt>Area 1</dt><dd>${escapeHtml(formatRating(normalized, "areaOneDiscomfort"))}</dd></div>
+          <div><dt>Area 2</dt><dd>${escapeHtml(formatRating(normalized, "areaTwoDiscomfort"))}</dd></div>
+          <div><dt>Soreness</dt><dd>${escapeHtml(formatRating(normalized, "sorenessBefore"))}</dd></div>
+        </dl>
+        <table>
+          <thead>
+            <tr>
+              <th>Exercise</th>
+              <th>Sets</th>
+              <th>Discomfort</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${normalized.exercises.map((exercise) => `
+              <tr>
+                <td>${escapeHtml(exercise.name)}</td>
+                <td>${escapeHtml(formatSets(exercise))}</td>
+                <td>${escapeHtml(exercise.painStatus || "-")}</td>
+                <td>${escapeHtml(exercise.notes || "-")}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        ${normalized.notes ? `<p class="session-notes"><strong>Session notes:</strong> ${escapeHtml(normalized.notes)}</p>` : ""}
+      </section>
+    `;
+  }
+
+  function printableReportHtml(workouts, title) {
+    const normalized = workouts.map(normalizeLegacyActive);
+    const completed = normalized.filter((workout) => workout.complete !== false);
+
+    return `<!doctype html>
+      <html lang="en">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <title>${escapeHtml(title)}</title>
+          <style>
+            * { box-sizing: border-box; }
+            body {
+              margin: 0;
+              color: #f7f7f8;
+              font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+              background:
+                radial-gradient(circle at 12% 0%, rgba(207, 38, 50, .36), transparent 300px),
+                radial-gradient(circle at 88% 16%, rgba(220, 239, 255, .10), transparent 260px),
+                linear-gradient(145deg, rgba(255,255,255,.035) 25%, transparent 25%, transparent 50%, rgba(255,255,255,.035) 50%, rgba(255,255,255,.035) 75%, transparent 75%, transparent),
+                #050505;
+              background-size: auto, auto, 18px 18px, auto;
+            }
+            main { max-width: 960px; margin: 0 auto; padding: 32px 20px; }
+            .toolbar { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 18px; }
+            button { border: 0; border-radius: 8px; padding: 10px 14px; color: white; background: linear-gradient(180deg, #d12a35, #9a121b); font-weight: 800; }
+            .cover, .workout {
+              overflow: hidden;
+              margin-bottom: 18px;
+              padding: 24px;
+              border: 1px solid rgba(255,255,255,.12);
+              border-radius: 14px;
+              background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.025)), rgba(20,20,22,.94);
+              box-shadow: 0 18px 46px rgba(0,0,0,.46);
+            }
+            .cover {
+              min-height: 340px;
+              display: grid;
+              align-content: end;
+              position: relative;
+              border-color: rgba(255, 53, 68, .28);
+            }
+            .cover::before {
+              content: "";
+              position: absolute;
+              inset: 0;
+              z-index: 0;
+              background:
+                linear-gradient(90deg, rgba(0,0,0,.88), rgba(0,0,0,.28)),
+                url("./assets/images/tiger-gym-buddy.png") center / cover no-repeat,
+                linear-gradient(135deg, #151515, #5e0f15);
+              opacity: .92;
+            }
+            .cover > * { position: relative; z-index: 1; }
+            .section-kicker {
+              margin: 0 0 8px;
+              color: #ff3a45;
+              font-size: 12px;
+              font-weight: 900;
+              letter-spacing: .1em;
+              text-transform: uppercase;
+            }
+            h1, h2 { margin: 0 0 8px; }
+            h1 { max-width: 680px; font-size: clamp(34px, 8vw, 64px); line-height: .95; }
+            h2 { color: #fff; }
+            p { margin: 0 0 12px; }
+            dl { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
+            dl div { padding: 10px; border: 1px solid rgba(255,255,255,.09); border-radius: 10px; background: rgba(0,0,0,.42); }
+            dt { color: #b9c4cf; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+            dd { margin: 4px 0 0; font-weight: 800; }
+            table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+            th, td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.10); text-align: left; vertical-align: top; }
+            th { color: #b9c4cf; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+            .workout-header {
+              display: grid;
+              grid-template-columns: 1fr 180px;
+              gap: 16px;
+              align-items: stretch;
+              margin: -24px -24px 18px;
+              padding: 18px 24px;
+              background: linear-gradient(90deg, rgba(0,0,0,.72), rgba(181,22,31,.20));
+            }
+            .workout-header img {
+              width: 100%;
+              height: 112px;
+              object-fit: cover;
+              border-radius: 10px;
+              border: 1px solid rgba(255,255,255,.14);
+            }
+            .session-notes { margin-top: 14px; padding: 12px; border-radius: 10px; color: #271b00; background: #f0a733; }
+            @media print {
+              body { color: #111; background: white; }
+              main { max-width: none; padding: 0; }
+              .toolbar { display: none; }
+              .cover, .workout { break-inside: avoid; color: #111; box-shadow: none; border-radius: 0; }
+              h2 { color: #111; }
+              dl div { color: #111; background: #f3f4f6; border-color: #ddd; }
+              dt, th { color: #555; }
+              th, td { border-bottom-color: #ddd; }
+            }
+            @media (max-width: 700px) {
+              dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+              .workout-header { grid-template-columns: 1fr; }
+            }
+          </style>
+        </head>
+        <body>
+          <main>
+            <div class="toolbar">
+              <strong>${escapeHtml(title)}</strong>
+              <button type="button" onclick="window.print()">Print / Save PDF</button>
+            </div>
+            <section class="cover">
+              <p class="section-kicker">Gym Tracker Report</p>
+              <h1>${escapeHtml(title)}</h1>
+              <p>Generated ${escapeHtml(new Date().toLocaleString())}</p>
+              <dl>
+                <div><dt>Workouts</dt><dd>${normalized.length}</dd></div>
+                <div><dt>Completed</dt><dd>${completed.length}</dd></div>
+                <div><dt>Avg Energy</dt><dd>${escapeHtml(averageRating(completed, "energy"))}</dd></div>
+                <div><dt>Avg Area 1</dt><dd>${escapeHtml(averageRating(completed, "areaOneDiscomfort"))}</dd></div>
+                <div><dt>Avg Area 2</dt><dd>${escapeHtml(averageRating(completed, "areaTwoDiscomfort"))}</dd></div>
+              </dl>
+            </section>
+            ${normalized.map((workout, index) => printableWorkoutHtml(workout, index)).join("")}
+          </main>
+        </body>
+      </html>`;
+  }
+
+  function openPrintableReport(workouts, title, fallbackName) {
+    if (!workouts.length) {
+      showToast("No history to export.");
+      return;
+    }
+
+    const html = printableReportHtml(workouts, title);
+    const reportWindow = window.open("", "_blank");
+
+    if (!reportWindow) {
+      downloadText(fallbackName, html, "text/html");
+      showToast("Popup blocked. Report HTML downloaded.");
+      return;
+    }
+
+    reportWindow.document.open();
+    reportWindow.document.write(html);
+    reportWindow.document.close();
+    reportWindow.focus();
+    showToast("Report opened. Use Print to save PDF.");
+  }
+
+  function printWorkoutReport(workoutId) {
+    const workout = findHistoryWorkout(workoutId);
+    if (!workout) {
+      showToast("Workout not found.");
+      return;
+    }
+
+    const normalized = normalizeLegacyActive(workout);
+    openPrintableReport([normalized], normalized.name, workoutFileName(normalized, "report", "html"));
+  }
+
+  function printHistoryReport() {
+    const history = getHistory();
+    openPrintableReport(history, "Workout History Report", `gym-tracker-history-report-${today()}.html`);
   }
 
   function exportLocalData() {
@@ -1214,6 +1568,10 @@
     if (target.dataset.saveAppName !== undefined) saveAppName();
     if (target.dataset.exportData !== undefined) exportLocalData();
     if (target.dataset.importData !== undefined) chooseImportFile();
+    if (target.dataset.exportHistoryAi !== undefined) exportHistoryForAi();
+    if (target.dataset.exportWorkoutAi) exportWorkoutForAi(target.dataset.exportWorkoutAi);
+    if (target.dataset.printHistory !== undefined) printHistoryReport();
+    if (target.dataset.printWorkout) printWorkoutReport(target.dataset.printWorkout);
     if (target.dataset.timer) startTimer(Number(target.dataset.timer));
     if (target.dataset.timerStop !== undefined) stopTimer();
   });
@@ -1230,6 +1588,7 @@
       state.active.notes = event.target.value;
       saveActive();
     }
+    if (event.target.dataset.setField) updateSet(event.target);
     if (event.target.dataset.appName !== undefined) {
       state.appName = event.target.value;
       applyAppName();

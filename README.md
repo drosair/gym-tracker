@@ -24,10 +24,12 @@ Current version: `v1.0.0`
 - Local-first workout and body-weight storage using `localStorage`
 - Locally editable app display name
 - Export/import local data when moving between deployment URLs
+- AI-focused and PDF-style history exports for single workouts or the full history
 - Workout Library with the Version 1.1 A/B/C program
 - Generic seeded sample history for the V1.1 program
 - Previous workout display per exercise
 - Workout completion tracking
+- Log screen autosave while typing
 - Pre-workout recovery status
 - Per-exercise pain/discomfort tracking and notes
 - Session notes plus energy, general discomfort, and soreness ratings
@@ -45,13 +47,14 @@ Current version: `v1.0.0`
    - Workout C — Full Body Growth
 4. Select your pre-workout recovery status before starting. Workout C can optionally add one Week 4+ finisher.
 5. Tap Start workout on a template to create a new local session for today.
-6. Use the Log tab to enter load, reps, or time for each set. Matching exercise history is shown on each exercise card.
+6. Use the Log tab to enter load, reps, or time for each set. Values autosave while typing and are saved again before leaving the Log tab.
 7. Record pain/discomfort and optional notes per exercise. These notes are stored only in localStorage on the device.
 8. At the end, add session notes and ratings for energy, general discomfort areas, and soreness before workout.
 9. Tap Finish workout to save the session to local history. Future targets are suggested from the last completed matching exercise.
 10. Use the History tab to edit a saved workout. Saving changes replaces that history entry instead of creating a duplicate; Cancel edit exits without changing the saved entry.
-11. Use Export data before changing deployment URLs, then Import data on the new URL to restore local data.
-12. Use the Weight and Timer tabs for body-weight entries and rest timing. All data stays in `localStorage` on the device.
+11. Use the History tab export buttons to download a single workout or full history for AI analysis, or open a PDF-style report that can be printed/saved as PDF.
+12. Use Export data before changing deployment URLs, then Import data on the new URL to restore local data.
+13. Use the Weight and Timer tabs for body-weight entries and rest timing. All data stays in `localStorage` on the device.
 
 ## Version 1.1 Program
 
@@ -140,6 +143,7 @@ Testing checklist:
 - Workout Library cards are tappable and start a fresh session.
 - Workout logging, history, body weight, timer, and progression suggestions still work.
 - Export downloads a JSON file and Import restores it on a clean browser/profile.
+- AI export downloads Markdown, and PDF-style report opens a printable page for one workout or the whole history.
 - `New best effort` appears only after beating a previous matching exercise.
 - Refresh once after deploy if the service worker is still serving an older cached version.
 
