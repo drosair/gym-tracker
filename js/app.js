@@ -8,16 +8,18 @@
       id: "workout-a-foundation",
       type: "Upper",
       name: "Workout A — Foundation Push/Pull",
-      focus: "Upper-body foundation. Stop 2-3 reps short of failure and progress by adding reps first.",
+      focus: "Shoulder-friendly upper-body foundation. Stop 2-3 reps short of failure and progress by adding reps first.",
       notes: [
-        "Monitor any discomfort during dumbbell bench press.",
+        "For pressing movements, keep discomfort at 0-3/10.",
+        "If pain is sharp, worsening, or above 3/10, stop the exercise and reduce load or swap movement.",
         "Stop 2-3 reps short of failure.",
         "Progress by adding reps first, then weight."
       ],
       exercises: [
-        { id: "db-bench", name: "Dumbbell Bench Press", sets: 2, repRange: "8-10", loadType: "kg", defaultLoad: "12.5", increment: 2.5 },
+        { id: "standing-cable-chest-press", name: "Standing Cable Chest Press", sets: 3, repRange: "10-12", loadType: "pin", defaultLoad: "", target: "Choose light starting pin x 10-12", increment: 1, tip: "Use a comfortable neutral grip if possible. Slow controlled reps. Stop if shoulder/bicep discomfort rises above 3/10." },
         { id: "seated-cable-row", name: "Seated Cable Row", sets: 3, repRange: "8-10", loadType: "pin", defaultLoad: "4", increment: 1 },
         { id: "lat-pulldown", name: "Lat Pulldown", sets: 3, repRange: "8-10", loadType: "pin", defaultLoad: "3", increment: 1 },
+        { id: "cable-face-pull", name: "Cable Face Pull", sets: 2, setLabel: "2-3 sets", repRange: "15-20", loadType: "pin", defaultLoad: "", target: "Light pin x 15-20", increment: 1, tip: "Rope attachment at face/chin height. Pull toward face, elbows high, squeeze shoulder blades, control the return." },
         { id: "lateral-raise", name: "Dumbbell Lateral Raise", sets: 3, repRange: "12-15", loadType: "kg", defaultLoad: "5", increment: 1 },
         { id: "hammer-curl", name: "Hammer Curl", sets: 3, repRange: "10-12", loadType: "kg", defaultLoad: "12.5", increment: 2.5 },
         { id: "rope-pushdown", name: "Rope Pushdown", sets: 3, repRange: "10-12", loadType: "pin", defaultLoad: "3", increment: 1 }
@@ -37,8 +39,9 @@
         { id: "goblet-squat", name: "Goblet Squat", sets: 2, repRange: "8-10", loadType: "kg", defaultLoad: "", increment: 2.5 },
         { id: "seated-leg-curl", name: "Seated Leg Curl", sets: 3, repRange: "10-12", loadType: "pin", defaultLoad: "", increment: 1 },
         { id: "leg-extension", name: "Leg Extension", sets: 2, repRange: "10-12", loadType: "pin", defaultLoad: "", increment: 1 },
-        { id: "incline-db-press", name: "Incline Dumbbell Press", sets: 3, repRange: "8-10", loadType: "kg", defaultLoad: "", increment: 2.5 },
+        { id: "standing-cable-or-machine-chest-press", name: "Standing Cable Chest Press OR Machine Chest Press", sets: 3, repRange: "10-12", loadType: "pin", defaultLoad: "", target: "Choose light starting pin x 10-12", increment: 1, tip: "Keep elbows slightly tucked. Avoid explosive reps. Pain-free range only." },
         { id: "chest-supported-row", name: "Chest Supported Row", sets: 3, repRange: "8-10", loadType: "kg", defaultLoad: "", increment: 2.5 },
+        { id: "cable-face-pull", name: "Cable Face Pull", sets: 2, setLabel: "2-3 sets", repRange: "15-20", loadType: "pin", defaultLoad: "", target: "Light pin x 15-20", increment: 1, tip: "Rope attachment at face/chin height. Pull toward face, elbows high, squeeze shoulder blades, control the return." },
         { id: "alternating-db-curl", name: "Alternating Dumbbell Curl", sets: 3, repRange: "10-12", loadType: "kg", defaultLoad: "", increment: 2.5 },
         { id: "plank", name: "Plank", sets: 3, repRange: "20-45 sec", loadType: "bodyweight", defaultLoad: "", increment: 0 }
       ]
@@ -53,9 +56,10 @@
         "Progress by adding reps first, then weight."
       ],
       exercises: [
-        { id: "db-bench", name: "Dumbbell Bench Press", sets: 2, repRange: "8-10", loadType: "kg", defaultLoad: "12.5", increment: 2.5 },
+        { id: "standing-cable-chest-press", name: "Standing Cable Chest Press", sets: 3, repRange: "10-12", loadType: "pin", defaultLoad: "", target: "Choose light starting pin x 10-12", increment: 1, tip: "Use a comfortable neutral grip if possible. Slow controlled reps. Stop if shoulder/bicep discomfort rises above 3/10." },
         { id: "lat-pulldown", name: "Lat Pulldown", sets: 3, repRange: "8-10", loadType: "pin", defaultLoad: "3", increment: 1 },
         { id: "seated-cable-row", name: "Seated Cable Row", sets: 3, repRange: "8-10", loadType: "pin", defaultLoad: "4", increment: 1 },
+        { id: "cable-face-pull", name: "Cable Face Pull", sets: 2, setLabel: "2-3 sets", repRange: "15-20", loadType: "pin", defaultLoad: "", target: "Light pin x 15-20", increment: 1, tip: "Rope attachment at face/chin height. Pull toward face, elbows high, squeeze shoulder blades, control the return." },
         { id: "lateral-raise", name: "Dumbbell Lateral Raise", sets: 3, repRange: "12-15", loadType: "kg", defaultLoad: "5", increment: 1 },
         { id: "hammer-curl", name: "Hammer Curl", sets: 3, repRange: "10-12", loadType: "kg", defaultLoad: "12.5", increment: 2.5 },
         { id: "rope-pushdown", name: "Rope Pushdown", sets: 3, repRange: "10-12", loadType: "pin", defaultLoad: "3", increment: 1 }
@@ -68,7 +72,7 @@
   ];
 
   const recoveryStatuses = ["Fresh", "Slightly sore", "Moderately sore", "Very sore"];
-  const painStatuses = ["No pain", "Mild discomfort", "Moderate pain", "Stop exercise"];
+  const painStatuses = ["No pain", "Mild discomfort", "Moderate discomfort", "Stop exercise"];
   const defaultRatings = {
     energy: "",
     areaOneDiscomfort: "",
@@ -149,9 +153,10 @@
       source: "Sample first workout",
       complete: true,
       exercises: [
-        makeExercise("db-bench", "Dumbbell Bench Press", "kg", "12.5", [10, 10]),
+        makeExercise("standing-cable-chest-press", "Standing Cable Chest Press", "pin", "1", [12, 12, 12]),
         makeExercise("seated-cable-row", "Seated Cable Row", "pin", "4", [10, 10, 10]),
         makeExercise("lat-pulldown", "Lat Pulldown", "pin", "3", [10, 10, 10]),
+        makeExercise("cable-face-pull", "Cable Face Pull", "pin", "1", [15, 15]),
         makeExercise("lateral-raise", "Dumbbell Lateral Raise", "kg", "5", [12, 12, 12]),
         makeExercise("hammer-curl", "Hammer Curl", "kg", "12.5", [12, 12, 12]),
         makeExercise("rope-pushdown", "Rope Pushdown", "pin", "3", [12, 12, 12])
@@ -226,6 +231,7 @@
           loadType: exercise.loadType,
           target: target.target,
           repRange: exercise.repRange,
+          tip: exercise.tip || "",
           sets: Array.from({ length: exercise.sets }, () => ({
             load: target.load,
             reps: "",
@@ -295,6 +301,7 @@
         loadType: exercise.loadType,
         target: exercise.target || suggestedTarget(getExerciseTemplate(exercise.id, templateId)).target,
         repRange: exercise.repRange || getExerciseTemplate(exercise.id, templateId).repRange,
+        tip: exercise.tip || getExerciseTemplate(exercise.id, templateId).tip || "",
         sets: exercise.sets,
         painStatus: exercise.painStatus || painStatuses[0],
         notes: exercise.notes || ""
@@ -357,8 +364,21 @@
       .join(", ");
   }
 
+  function formatSetsWithStatus(exercise) {
+    return exercise.sets
+      .map((set, index) => {
+        const status = set.done ? "done" : "not done";
+        return `Set ${index + 1}: ${formatLoad(exercise, set.load)} x ${set.reps || "-"} (${status})`;
+      })
+      .join("; ");
+  }
+
   function setCountLabel(count) {
     return `${count} ${count === 1 ? "set" : "sets"}`;
+  }
+
+  function exerciseSetLabel(exercise) {
+    return exercise.setLabel || setCountLabel(exercise.sets);
   }
 
   function completedHistory() {
@@ -521,13 +541,13 @@
       if (!template.defaultLoad && template.loadType !== "bodyweight") {
         return {
           load: "",
-          target: `${template.loadType === "pin" ? "Choose starting pin" : "Choose starting load"} x ${template.repRange}`
+          target: template.target || `${template.loadType === "pin" ? "Choose starting pin" : "Choose starting load"} x ${template.repRange}`
         };
       }
 
       return {
         load: template.defaultLoad,
-        target: template.loadType === "bodyweight" ? template.repRange : `${formatLoad(template, template.defaultLoad)} x ${template.repRange}`
+        target: template.target || (template.loadType === "bodyweight" ? template.repRange : `${formatLoad(template, template.defaultLoad)} x ${template.repRange}`)
       };
     }
 
@@ -608,6 +628,7 @@
         <p class="section-kicker">Today</p>
         <h2 id="dashboard-title">Dashboard</h2>
         <p class="muted">${escapeHtml(state.active.name)} is loaded. Choose a different day from the workout library whenever you want.</p>
+        <p class="safety-note">For pressing movements, keep discomfort at 0-3/10. If pain is sharp, worsening, or above 3/10, stop the exercise and reduce load or swap movement.</p>
         <p class="buddy-says"><strong>Gym Buddy says:</strong> ${escapeHtml(buddyMessage)}</p>
         <div class="progress-track" aria-label="Workout completion">
           <div class="progress-fill" style="width: ${stats.pct}%"></div>
@@ -709,10 +730,11 @@
                   <div class="template-exercise">
                     <div>
                       <strong>${icon(exerciseIconName(exercise))}${escapeHtml(exercise.name)}</strong>
-                      <span class="small">${setCountLabel(exercise.sets)}, ${escapeHtml(exercise.repRange)}</span>
+                      <span class="small">${escapeHtml(exerciseSetLabel(exercise))}, ${escapeHtml(exercise.repRange)}</span>
                     </div>
                     <p class="small">${previous ? `LAST TIME ${escapeHtml(formatSets(previous.exercise))}` : "LAST TIME none yet"}</p>
                     <p class="suggestion compact">${escapeHtml(target.target)}</p>
+                    ${exercise.tip ? `<p class="small exercise-tip">${escapeHtml(exercise.tip)}</p>` : ""}
                   </div>
                 `;
               }).join("")}
@@ -735,7 +757,7 @@
                   <select id="${escapeHtml(finisherId)}">
                     <option value="">No finisher</option>
                     ${template.finishers.map((finisher) => `
-                      <option value="${escapeHtml(finisher.id)}">${escapeHtml(finisher.name)} - ${setCountLabel(finisher.sets)}, ${escapeHtml(finisher.repRange)}</option>
+                      <option value="${escapeHtml(finisher.id)}">${escapeHtml(finisher.name)} - ${escapeHtml(exerciseSetLabel(finisher))}, ${escapeHtml(finisher.repRange)}</option>
                     `).join("")}
                   </select>
                 </div>
@@ -777,7 +799,7 @@
             <div>
               <h3>${escapeHtml(exercise.name)}</h3>
               <div class="exercise-meta">
-                <span class="pill">${icon(exerciseIconName(template))}${setCountLabel(template.sets)}, ${escapeHtml(template.repRange)}</span>
+                <span class="pill">${icon(exerciseIconName(template))}${escapeHtml(exerciseSetLabel(template))}, ${escapeHtml(template.repRange)}</span>
                 <span class="pill">${icon("target")}${escapeHtml(exercise.target || suggestedTarget(template).target)}</span>
               </div>
               <div class="comparison">
@@ -785,6 +807,7 @@
               </div>
               ${bestEffort ? "<div class=\"best-effort\">New best effort 🐯</div>" : ""}
               <div class="suggestion">${escapeHtml(progressionSuggestion(exercise, template))}</div>
+              ${exercise.tip || template.tip ? `<p class="small exercise-tip">${escapeHtml(exercise.tip || template.tip)}</p>` : ""}
             </div>
             <span class="badge">${exercise.loadType === "bodyweight" ? "BW" : `${Math.round(volume(exercise))} vol`}</span>
           </div>
@@ -1248,7 +1271,7 @@
             ${normalized.exercises.map((exercise) => `
               <tr>
                 <td>${escapeHtml(exercise.name)}</td>
-                <td>${escapeHtml(formatSets(exercise))}</td>
+                <td>${escapeHtml(formatSetsWithStatus(exercise))}</td>
                 <td>${escapeHtml(exercise.painStatus || "-")}</td>
                 <td>${escapeHtml(exercise.notes || "-")}</td>
               </tr>
