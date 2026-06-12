@@ -567,6 +567,10 @@
   }
 
   function progressionSuggestion(exercise, template) {
+    if (!exercise) {
+      return `Start target: ${suggestedTarget(template).target}. Keep discomfort in the safe range and log this movement when you start it.`;
+    }
+
     const completeSets = exercise.sets.filter((set) => set.done && numeric(set.reps) > 0);
     const top = targetTop(template);
     const allTop = completeSets.length === exercise.sets.length && completeSets.every((set) => numeric(set.reps) >= top);
