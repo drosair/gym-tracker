@@ -284,6 +284,7 @@
     if (!workout) return workout;
     const templateId = workout.templateId || workoutTemplates[0].id;
     const legacyRatings = workout.sessionRatings || {};
+    const sourceExercises = Array.isArray(workout.exercises) ? workout.exercises : [];
 
     const normalized = {
       ...workout,
@@ -295,17 +296,21 @@
         areaOneDiscomfort: legacyRatings.areaOneDiscomfort ?? legacyRatings[legacyRatingKeys.areaOneDiscomfort] ?? "",
         areaTwoDiscomfort: legacyRatings.areaTwoDiscomfort ?? legacyRatings[legacyRatingKeys.areaTwoDiscomfort] ?? ""
       },
-      exercises: workout.exercises.map((exercise) => ({
-        id: exercise.id,
-        name: exercise.name,
-        loadType: exercise.loadType,
-        target: exercise.target || suggestedTarget(getExerciseTemplate(exercise.id, templateId)).target,
-        repRange: exercise.repRange || getExerciseTemplate(exercise.id, templateId).repRange,
-        tip: exercise.tip || getExerciseTemplate(exercise.id, templateId).tip || "",
-        sets: exercise.sets,
-        painStatus: exercise.painStatus || painStatuses[0],
-        notes: exercise.notes || ""
-      }))
+      exercises: sourceExercises.map((exercise) => {
+        const template = getExerciseTemplate(exercise.id, templateId);
+
+        return {
+          id: exercise.id || template.id,
+          name: exercise.name || template.name,
+          loadType: exercise.loadType || template.loadType || "kg",
+          target: exercise.target || suggestedTarget(template).target,
+          repRange: exercise.repRange || template.repRange || "8-12",
+          tip: exercise.tip || template.tip || "",
+          sets: Array.isArray(exercise.sets) ? exercise.sets : [],
+          painStatus: exercise.painStatus || painStatuses[0],
+          notes: exercise.notes || ""
+        };
+      })
     };
 
     return normalized;
@@ -345,9 +350,13 @@
   }
 
   function completedStats(workout) {
-    const total = workout.exercises.reduce((count, exercise) => count + exercise.sets.length, 0);
+    if (!workout || !Array.isArray(workout.exercises)) return { total: 0, done: 0, pct: 0 };
+
+    const total = workout.exercises.reduce((count, exercise) => {
+      return count + (Array.isArray(exercise.sets) ? exercise.sets.length : 0);
+    }, 0);
     const done = workout.exercises.reduce((count, exercise) => {
-      return count + exercise.sets.filter((set) => set.done).length;
+      return count + (Array.isArray(exercise.sets) ? exercise.sets.filter((set) => set.done).length : 0);
     }, 0);
     return { total, done, pct: total ? Math.round((done / total) * 100) : 0 };
   }
@@ -359,13 +368,13 @@
   }
 
   function formatSets(exercise) {
-    return exercise.sets
+    return (Array.isArray(exercise.sets) ? exercise.sets : [])
       .map((set) => `${formatLoad(exercise, set.load)} x ${set.reps || "-"}`)
       .join(", ");
   }
 
   function formatSetsWithStatus(exercise) {
-    return exercise.sets
+    return (Array.isArray(exercise.sets) ? exercise.sets : [])
       .map((set, index) => {
         const status = set.done ? "done" : "not done";
         return `Set ${index + 1}: ${formatLoad(exercise, set.load)} x ${set.reps || "-"} (${status})`;
@@ -478,7 +487,9 @@
 
   function exerciseIconName(exercise) {
     if (exercise.loadType === "bodyweight") return "bodyweight";
-    if (exercise.name.toLowerCase().includes("timer") || exercise.repRange.includes("sec") || exercise.repRange.includes("min")) return "timer";
+    const name = String(exercise.name || "").toLowerCase();
+    const repRange = String(exercise.repRange || "");
+    if (name.includes("timer") || repRange.includes("sec") || repRange.includes("min")) return "timer";
     return "dumbbell";
   }
 
@@ -497,11 +508,12 @@
   }
 
   function volume(exercise) {
-    return exercise.sets.reduce((total, set) => total + numeric(set.load) * numeric(set.reps), 0);
+    return (Array.isArray(exercise.sets) ? exercise.sets : [])
+      .reduce((total, set) => total + numeric(set.load) * numeric(set.reps), 0);
   }
 
   function bestSetScore(exercise) {
-    return exercise.sets.reduce((best, set) => {
+    return (Array.isArray(exercise.sets) ? exercise.sets : []).reduce((best, set) => {
       if (!set.done && !set.reps) return best;
       const load = exercise.loadType === "bodyweight" ? 0 : numeric(set.load);
       const reps = numeric(set.reps);
@@ -529,7 +541,7 @@
   }
 
   function targetTop(template) {
-    const matches = template.repRange.match(/\d+/g) || [];
+    const matches = String(template.repRange || "").match(/\d+/g) || [];
     return Number(matches[matches.length - 1]) || 12;
   }
 
@@ -571,9 +583,10 @@
       return `Start target: ${suggestedTarget(template).target}. Keep discomfort in the safe range and log this movement when you start it.`;
     }
 
-    const completeSets = exercise.sets.filter((set) => set.done && numeric(set.reps) > 0);
+    const exerciseSets = Array.isArray(exercise.sets) ? exercise.sets : [];
+    const completeSets = exerciseSets.filter((set) => set.done && numeric(set.reps) > 0);
     const top = targetTop(template);
-    const allTop = completeSets.length === exercise.sets.length && completeSets.every((set) => numeric(set.reps) >= top);
+    const allTop = completeSets.length === exerciseSets.length && completeSets.every((set) => numeric(set.reps) >= top);
     const previous = findPreviousExercise(exercise.id);
     const label = template.loadType === "pin" ? "pin" : "kg";
 
@@ -585,7 +598,7 @@
       return `Start target: ${suggestedTarget(template).target}. Keep two clean reps in reserve.`;
     }
 
-    if (completeSets.length < exercise.sets.length) {
+    if (completeSets.length < exerciseSets.length) {
       return "Keep logging the remaining sets before changing the load.";
     }
 
@@ -782,7 +795,8 @@
       const previous = findPreviousExercise(exercise.id);
       const bestEffort = isBestEffort(exercise, previous);
       const loadLabel = exercise.loadType === "pin" ? "Pin" : exercise.loadType === "bodyweight" ? "Load" : "kg";
-      const setRows = exercise.sets.map((set, setIndex) => `
+      const exerciseSets = Array.isArray(exercise.sets) ? exercise.sets : [];
+      const setRows = exerciseSets.map((set, setIndex) => `
         <div class="set-row">
           <div class="set-number">${setIndex + 1}</div>
           <div>
@@ -818,7 +832,7 @@
           <div class="set-list">${setRows}</div>
           <div class="set-tools">
             <button class="button-secondary" type="button" data-add-set data-exercise-index="${exerciseIndex}">Add set</button>
-            <button class="button-secondary" type="button" data-remove-set data-exercise-index="${exerciseIndex}" ${exercise.sets.length <= template.sets ? "disabled" : ""}>Remove extra set</button>
+            <button class="button-secondary" type="button" data-remove-set data-exercise-index="${exerciseIndex}" ${exerciseSets.length <= template.sets ? "disabled" : ""}>Remove extra set</button>
           </div>
           <div class="exercise-controls">
             <div>
