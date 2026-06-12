@@ -18,15 +18,16 @@
       "notes": "Sample completed session. Personal notes are only stored locally when entered in the app.",
       "exercises": [
         {
-          "id": "db-bench",
-          "name": "Dumbbell Bench Press",
-          "loadType": "kg",
-          "repRange": "8-10",
+          "id": "standing-cable-chest-press",
+          "name": "Standing Cable Chest Press",
+          "loadType": "pin",
+          "repRange": "10-12",
           "painStatus": "No pain",
           "notes": "",
           "sets": [
-            { "load": "12.5", "reps": "10", "done": true },
-            { "load": "12.5", "reps": "10", "done": true }
+            { "load": "1", "reps": "12", "done": true },
+            { "load": "1", "reps": "12", "done": true },
+            { "load": "1", "reps": "12", "done": true }
           ]
         },
         {
@@ -53,6 +54,18 @@
             { "load": "3", "reps": "10", "done": true },
             { "load": "3", "reps": "10", "done": true },
             { "load": "3", "reps": "10", "done": true }
+          ]
+        },
+        {
+          "id": "cable-face-pull",
+          "name": "Cable Face Pull",
+          "loadType": "pin",
+          "repRange": "15-20",
+          "painStatus": "No pain",
+          "notes": "",
+          "sets": [
+            { "load": "1", "reps": "15", "done": true },
+            { "load": "1", "reps": "15", "done": true }
           ]
         },
         {

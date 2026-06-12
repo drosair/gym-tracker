@@ -32,6 +32,7 @@ Current version: `v1.0.0`
 - Log screen autosave while typing
 - Pre-workout recovery status
 - Per-exercise pain/discomfort tracking and notes
+- Shoulder-friendly pressing substitutions and face pulls in upper/full-body templates
 - Session notes plus energy, general discomfort, and soreness ratings
 - Weekly dashboard stats for completed workouts, streak, last workout, and average ratings
 - Progressive overload suggestions
@@ -60,28 +61,33 @@ Current version: `v1.0.0`
 
 Workout A — Foundation Push/Pull:
 
-- Dumbbell Bench Press: 2 sets x 8-10 reps
+- Standing Cable Chest Press: 3 sets x 10-12 reps
 - Seated Cable Row: 3 sets x 8-10 reps
 - Lat Pulldown: 3 sets x 8-10 reps
+- Cable Face Pull: 2-3 sets x 15-20 reps
 - Dumbbell Lateral Raise: 3 sets x 12-15 reps
 - Hammer Curl: 3 sets x 10-12 reps
 - Rope Pushdown: 3 sets x 10-12 reps
+
+Pressing guidance: keep discomfort at 0-3/10. If pain is sharp, worsening, or above 3/10, stop the exercise and reduce load or swap movement.
 
 Workout B — Legs + Upper Body:
 
 - Goblet Squat: 2 sets x 8-10 reps
 - Seated Leg Curl: 3 sets x 10-12 reps
 - Leg Extension: 2 sets x 10-12 reps
-- Incline Dumbbell Press: 3 sets x 8-10 reps
+- Standing Cable Chest Press OR Machine Chest Press: 3 sets x 10-12 reps
 - Chest Supported Row: 3 sets x 8-10 reps
+- Cable Face Pull: 2-3 sets x 15-20 reps
 - Alternating Dumbbell Curl: 3 sets x 10-12 reps
 - Plank: 3 sets
 
 Workout C — Full Body Growth:
 
-- Dumbbell Bench Press: 2 sets x 8-10 reps
+- Standing Cable Chest Press: 3 sets x 10-12 reps
 - Lat Pulldown: 3 sets x 8-10 reps
 - Seated Cable Row: 3 sets x 8-10 reps
+- Cable Face Pull: 2-3 sets x 15-20 reps
 - Dumbbell Lateral Raise: 3 sets x 12-15 reps
 - Hammer Curl: 3 sets x 10-12 reps
 - Rope Pushdown: 3 sets x 10-12 reps
